@@ -27,6 +27,9 @@ import { KuberoAddonMongodb } from './plugins/kuberoaddonsMongodb';
 import { KuberoAddonMemcached } from './plugins/kuberoaddonsMemcached';
 import { Cluster as CloudnativePG } from './plugins/cloudnativePG';
 import { Elasticsearch } from './plugins/elasticsearch';
+import { KuberoMysqlGroundhog2k } from './plugins/kuberoMysqlGroundhog2k';
+import { KuberoPostgresqlGroundhog2k } from './plugins/kuberoPostgresqlGroundhog2k';
+import { KuberoRedisGroundhog2k } from './plugins/kuberoRedisGroundhog2k';
 
 @Injectable()
 export class AddonsService {
@@ -42,13 +45,12 @@ export class AddonsService {
     // Load all Custom Resource Definitions to get the list of installed operators
     this.CRDList = await this.kubectl.getCustomresources();
 
-
     const kuberoAddonPostgres = new KuberoAddonPostgres(this.CRDList);
     this.addonsList.push(kuberoAddonPostgres);
 
     const kuberoAddonRedis = new KuberoAddonRedis(this.CRDList);
     this.addonsList.push(kuberoAddonRedis);
-    
+
     const kuberoAddonMysql = new KuberoAddonMysql(this.CRDList);
     this.addonsList.push(kuberoAddonMysql);
 
@@ -57,6 +59,17 @@ export class AddonsService {
 
     const kuberoAddonMongodb = new KuberoAddonMongodb(this.CRDList);
     this.addonsList.push(kuberoAddonMongodb);
+
+    const kuberoMysqlGroundhog2k = new KuberoMysqlGroundhog2k(this.CRDList);
+    this.addonsList.push(kuberoMysqlGroundhog2k);
+
+    const kuberoPostgresqlGroundhog2k = new KuberoPostgresqlGroundhog2k(
+      this.CRDList,
+    );
+    this.addonsList.push(kuberoPostgresqlGroundhog2k);
+
+    const kuberoRedisGroundhog2k = new KuberoRedisGroundhog2k(this.CRDList);
+    this.addonsList.push(kuberoRedisGroundhog2k);
 
     const kuberoCouchDB = new KuberoCouchDB(this.CRDList);
     this.addonsList.push(kuberoCouchDB);
@@ -120,7 +133,6 @@ export class AddonsService {
 
     const kuberoRabbitMQ = new KuberoRabbitMQ(this.CRDList);
     this.addonsList.push(kuberoRabbitMQ);
-
   }
 
   public async getAddonsList(): Promise<IPlugin[]> {
