@@ -17,14 +17,43 @@ describe('Plugin (abstract)', () => {
 
   let plugin: TestPlugin;
   let loggerSpy: jest.SpyInstance;
+  let errorSpy: jest.SpyInstance;
 
   beforeEach(() => {
     plugin = new TestPlugin();
-    loggerSpy = jest
-      .spyOn(Logger.prototype, 'log')
-      .mockImplementation(() => {});
+    loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {});
     jest.spyOn(Logger.prototype, 'debug').mockImplementation(() => {});
-    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
+    errorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
+  });
+
+  it('should not crash when operator data is malformed', async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: {
+        description: 'desc',
+        maintainers: [],
+        links: [],
+        readme: '',
+        version: '1.2.3',
+      },
+    });
+
+    const availableCRDs = [
+      {
+        spec: { names: { kind: 'TestPlugin' }, version: '1.0.0' },
+        metadata: {
+          annotations: {
+            'alm-examples': 'invalid-json',
+          },
+        },
+      },
+    ];
+
+    await plugin.init(availableCRDs);
+
+    expect(plugin.enabled).toBe(true);
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Error parsing CRD examples'),
+    );
   });
 
   afterEach(() => {
