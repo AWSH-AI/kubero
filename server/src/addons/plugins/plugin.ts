@@ -122,19 +122,25 @@ export abstract class Plugin {
     }
 
     const operatorCRDList =
-      this.operator_data.metadata.annotations['alm-examples'];
+      this.operator_data?.metadata?.annotations?.['alm-examples'];
 
     if (operatorCRDList === undefined) {
       this.logger.error('   No CRDs defined in operator for ' + this.id);
       return;
     }
 
-    for (const op of JSON.parse(operatorCRDList)) {
-      if (op.kind === this.constructor.name) {
-        //this.crd = op;
-        this.resourceDefinitions[op.kind] = op;
-        break;
+    try {
+      for (const op of JSON.parse(operatorCRDList)) {
+        if (op.kind === this.constructor.name) {
+          //this.crd = op;
+          this.resourceDefinitions[op.kind] = op;
+          break;
+        }
       }
+    } catch (error) {
+      this.logger.error(
+        '   Error parsing CRD examples for ' + this.id + ': ' + error,
+      );
     }
   }
 
